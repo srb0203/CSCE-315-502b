@@ -41,7 +41,7 @@ void Table::dis_table(){
     }
     cout << endl;
   }
-  cout << endl;
+  cout << "        ---------------------------------------------------------" << endl;
 }
 
 void Table::insert_elements() {
