@@ -5,11 +5,10 @@
 
 using namespace std;
 
-enum Type {INT, CHAR};
+enum Type {INT, STRING};
 union Value {
   int i;
-  char c;
-  char c2;
+  char* c;
 };
 struct Cell {
   Type type;
@@ -17,10 +16,11 @@ struct Cell {
 };
 
 class Attribute{
-  private:
+  public:
     string name;
   public:
     Type type;
+    Attribute () {};
     Attribute(Type t, string n) : type(t), name(n) {};
     vector<Cell> cell;
     void push_back(Value& v)
