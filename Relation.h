@@ -43,6 +43,9 @@ class Relation{
 
     void read(string s);
 
+    void Create(string name, int year , string model) {
+          }
+
     void dis_table() {
       vector<Cell> tuple;
       Attribute intsecho = getAttribute(0);
@@ -51,22 +54,29 @@ class Relation{
       cout << "\n--------------------------------" << endl;
       cout <<"         DATABASE TABLE           " << endl;
       cout <<"--------------------------------" << endl;
-      cout << intsecho.getName() << " " << charsecho.getName() << " " << char2echo.getName() << endl;
+      cout << intsecho.getName() << setw(12) << charsecho.getName() << setw(13) << char2echo.getName() << endl;
       cout <<"--------------------------------" << endl;
-      for(int i=0; i<attr.size()/3; ++i) {
-        tuple = getTuple(i);
-        cout << tuple[0].value.i << setw(12) << tuple[1].value.c << setw(12) << tuple[2].value.c2 << endl;
+      int s = 0;
+      int s2 = 1;
+      int s3 = 2;
+
+      for(int i=0; i < attr.size()/3; ++i) {
+        tuple = getTuple(0);
+        cout << tuple[s].value.i << setw(12) << tuple[s2].value.c << setw(12) << tuple[s3].value.c << endl;
+        s = s+3;
+        s2 = s2+3;
+        s3 = s3+3;
       }
     }
 
-    void Insert(char s1, int i1 , char s2) { 
-      Attribute ints(INT, "Integers");
-      Attribute chars(CHAR, "Characters1");
-      Attribute chars2(CHAR, "Characters2");
+    void Insert(char* s1, int i1 , char* s2) { 
+      Attribute ints(INT, "Year");
+        Attribute chars2(STRING, "Model");
+        Attribute chars(STRING, "Car");
       Value v1, v2 , v3;
       v1.i = i1;
       v2.c = s1;
-      v3.c2 = s2;
+      v3.c = s2;
       ints.push_back(v1);
       chars.push_back(v2);
       chars2.push_back(v3);
@@ -74,6 +84,10 @@ class Relation{
       add_attr(ints);
       add_attr(chars);
       add_attr(chars2);
+    }
+
+    void Write() {
+      cout << "Requires File I/O, will be implemented in the next part " << endl;
     }
 };
 #endif
