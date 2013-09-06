@@ -7,16 +7,21 @@ int main(){
   Database d;
 
   Relation r;
-  r.Insert('q', 58,'a');
-  r.Insert('f', 48,'t');
-  r.Insert('a',67,'b');
-  r.Insert('z',54,'c'); 
-  cout << "number of attributes " << r.getNumAttributes() << endl;
+  r.Insert("Audi", 2013,"R8");
+  r.Insert("Chevrolet", 2011,"Cobalt");
+  r.Insert("Mercedes",2010,"Benz");
+  r.Insert("Dodge",2009,"Charger");
+  r.Insert("Nissan", 2006 , "Altima");
+
+  //r.Insert("add",5);
+  //r.Insert("sub",6);
+
+  cout << "\nNumber of attributes " << r.getNumAttributes() << endl;
 
   r.dis_table();
 
 
 
-  d.Show();
+  //d.Show();
   return 0;
 }
