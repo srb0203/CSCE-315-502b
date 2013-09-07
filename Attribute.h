@@ -5,38 +5,43 @@
 
 using namespace std;
 
+typedef string Cell;
+
 enum Type {INT, STRING};
-union Value {
-  int i;
-  char* c;
-};
-struct Cell {
-  Type type;
-  Value value;
-};
+
+typedef pair<string, Type> Header;
 
 class Attribute{
   public:
     string name;
   public:
     Type type;
+    vector<string> cell;
     Attribute () {};
     Attribute(Type t, string n) : type(t), name(n) {};
-    vector<Cell> cell;
-    void push_back(Value& v)
+   
+    void push_back(string v)
     {
-      Cell c;
-      c.type = type;
-      c.value = v;
-      cell.push_back(c);
+      cell.push_back(v);
     }
-    vector<Cell> getCells(){
+    vector<string> getCells() const{
       return cell;
     }
     string getName()
     {
       return name;
     }
+	int getLength() const{
+		return cell.size();
+	}
+	void setName(string set_name)
+    {
+      name = set_name;
+    }
+
+  Cell& operator[](size_t row){
+    return cell[row];
+  }
     //string getName();
 };
 #endif
