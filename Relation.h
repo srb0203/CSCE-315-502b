@@ -48,6 +48,10 @@ class Relation{
       return tuple;
     }
 
+    int getRowSize() {
+      return attr[0].getLength();
+    }
+
     void read(string s);
 
     void Create(string rel_name){
@@ -56,7 +60,7 @@ class Relation{
 
     void Show() {
       vector<Cell> tuple;
-      cout << "\n          ------------------------------------" << endl;
+      cout << "\n\n          ------------------------------------" << endl;
       cout << "                     DATABASE TABLE           " << endl;
       cout << "          ------------------------------------" << endl;
       for(int i = 0; i< attr.size(); i++) {
@@ -66,19 +70,20 @@ class Relation{
       cout <<"          ------------------------------------" << endl;
 
       for(int r=0; r < attr[0].getLength(); ++r) {
-        for(int c = 0; c< attr.size(); c++)
+        for(int c = 0; c< attr.size(); c++){
           cout << setw(15) << (*this)[c][r];
+        }
         cout << endl;
       }
     }
 
-void Rename(string new_name, string old_name) {
-  for(int i =0; i < attr.size(); i++) {
-    if(old_name == attr[i].name) {
-      attr[i].name = new_name;
+    void Rename(string new_name, string old_name) {
+      for(int i =0; i < attr.size(); i++) {
+        if(old_name == attr[i].name) {
+          attr[i].name = new_name;
+        }
+      }
     }
-  }
-}
 
     void Insert(const vector<Cell>& row) { 
       for(int c = 0; c< attr.size(); c++)
@@ -88,5 +93,20 @@ void Rename(string new_name, string old_name) {
     void Write() {
       cout << "Requires File I/O, will be implemented in the next part " << endl;
     }
+
+    void Delete_attr(const string& attribute) {
+      for(int i =0; i < attr.size(); i++) {
+        for(int j = 0; j < attr[0].getLength(); j++) {
+          if(attribute == attr[i][j]) {
+            cout << "Found " << attr[i][j] << endl;
+            attr[i][j] = "";
+            cout << "Deleted " << attribute << endl;
+            return;
+          }
+        }
+      }
+      cout << "Did not find " << attribute << " in the relation" << endl;
+    }
+
 };
 #endif
