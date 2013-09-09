@@ -31,6 +31,10 @@ class Attribute{
     {
       return name;
     }
+
+    Type getType() {
+      return type;
+    }
 	int getLength() const{
 		return cell.size();
 	}
