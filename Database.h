@@ -7,11 +7,16 @@ using namespace std;
 class Database {
   public:
     typedef map<string,Relation> Table;
-    vector<Relation> relation;
-  Database(){};
+	vector<Relation> relation;
+	Relation Selection;
+	Relation Projection;
+	Database(){Selection.name = "Selection"; Projection.name = "Projection";};
+	//Database(){};
     Table table;
-    void Selection(Relation name, string attr_name);
+     void Select(string attr_name, string condition, string cell_condition, string rel_name);
+	void Project(vector<string> attr_name, string rel_name);
     void Create(string rel_name);
+	void Delete(string rel_name);
     void AddColumn(const string& rel_name, const Header& h);
     void Insert(string rel_name, const vector<Cell>& row);
     void Write(const string& rel_name);
@@ -20,4 +25,6 @@ class Database {
     Relation& operator[](const string& s);
     void Delete_attr(const string& rel_name,const string& attribute);
     void Union(const string& rel_name1,const string& rel_name2);
+	void Difference(const string& rel_name1, const string& rel_name2, const string& rel_name3);
+	void Product(const string& rel_name1, const string& rel_name2, const string& rel_name3);
 };
