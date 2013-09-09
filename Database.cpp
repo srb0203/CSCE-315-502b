@@ -80,20 +80,36 @@ void Database::Union(const string& rel_name1,const string& rel_name2) {
       break;
     }
   }
-  Create(rel_name1+rel_name2+"Union");
-  bool insrt = true;
-  
-  int i1Rowsize = relation[i1].getRowSize();
-  int jrowsize = relation[i2].getRowSize();
-  for(int j=0; j < jrowsize; j++) {
-    for(int i=0; i < relation[i1].getRowSize(); i++) {
-      if(relation[i2].getRow(j) == relation[i1].getRow(i)) {
-        break;
-      }
-      if(i==jrowsize-1){
-        Insert(relation[i1].name,relation[i2].getRow(j));
-        break;
+  bool canInsert = true;
+  if(relation[i1].getNumAttributes() == relation[i2].getNumAttributes()) { 
+  for(int i=0; i<relation[i1].getNumAttributes();i++){
+    if(relation[i1].getAttributeType(i) != relation[i2].getAttributeType(i)) {
+      cout << "Attributes do not have the same type, cannot insert " << endl;
+      canInsert = false;
+    }
+  }
+
+
+    //Create(rel_name1+rel_name2+"Union");
+    bool insrt = true;
+
+    int i1Rowsize = relation[i1].getRowSize();
+    int jrowsize = relation[i2].getRowSize();
+    if(canInsert){
+    for(int j=0; j < jrowsize; j++) {
+      for(int i=0; i < relation[i1].getRowSize(); i++) {
+        if(relation[i2].getRow(j) == relation[i1].getRow(i)) {
+          break;
+        }
+        if(i==jrowsize-1){
+          Insert(relation[i1].name,relation[i2].getRow(j));
+          break;
+        }
       }
     }
-  } 
+    }
+  }
+  else {
+    cout << "Size does not match " << endl;
+  }
 }
