@@ -38,6 +38,10 @@ class Relation{
     {
       return attr.size();
     }
+
+    Type getAttributeType(int n) {
+      return attr[n].type;
+    }
     vector<Cell> getRow(int n)
     {
       vector<Cell> tuple;
@@ -61,7 +65,7 @@ class Relation{
     void Show() {
       vector<Cell> tuple;
       cout << "\n\n          ------------------------------------" << endl;
-      cout << "                     DATABASE TABLE           " << endl;
+      cout << "           " << name << " TABLE           " << endl;
       cout << "          ------------------------------------" << endl;
       for(int i = 0; i< attr.size(); i++) {
         cout << setw(15) << getAttribute(i).getName() << setw(15);
@@ -74,6 +78,7 @@ class Relation{
           cout << setw(15) << (*this)[c][r];
         }
         cout << endl;
+		cout << endl;
       }
     }
 
