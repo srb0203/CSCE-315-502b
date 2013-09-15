@@ -11,20 +11,24 @@ bool identifier(Token_stream& ts)
 {
 	string identifier_name = "";
 	Token t = ts.get();
+	if(t.kind == ' '){
+		t = ts.get();
+	}
 	if(t.kind != 'a')
 	{
 		ts.putback(t);
 		return false;
 	}
-	identifier_name += t.value;
-	t = ts.get();
 	while(t.kind == 'a' || t.kind == '0')
 	{
 		identifier_name += t.value;
 		t = ts.get();
 	}
+	if(t.kind == ' '){
+		t = ts.get();
+	}
 	ts.putback(t);
-	cout << identifier_name << endl;
+	cout << "REL: " << identifier_name << endl;
 	return true;
 }
 bool relation_name(Token_stream& ts)
@@ -41,25 +45,111 @@ bool atomic_expr(Token_stream& ts){
 bool name_check(Token_stream& ts, string input){
 	string comp = "";
 	Token t = ts.get();
-	vector<Token> tt; //keeps track of tokens that are cycled through
-	comp += t.value;
-	tt.push_back(t);
-	while(t.kind = 'a' && (comp.size() != input.size()) ){
+	if(t.kind == ' '){
 		t = ts.get();
-		comp += t.value;
-		tt.push_back(t);
-		if(comp == input){
-			cout << input << endl;
-			return true;
-		}
 	}
-	for(int i = 0; i<tt.size(); ++i){
+	if(t.kind != 'a')
+	{
+		ts.putback(t);
+		return false;
+	}
+	vector<Token> tt; //keeps track of tokens that are cycled through
+	tt.push_back(t);
+	while(t.kind == 'a'){
+		comp += t.value;
+		t = ts.get();	
+		tt.push_back(t);
+	}
+	if(comp == input){
+		cout << "CMD: " << input << endl;
+		ts.putback(t);
+		return true;
+	}
+	
+	for(int i=tt.size()-1;i>-1;--i){
 		ts.putback(tt[i]);
+		//cout << ' ' << tt[i] << endl;
 	}
 	return false;
 }
+
+bool check_varchar(Token_stream& ts) {
+Token t;
+  const string varchar="VARCHAR";
+for(size_t i=0;i<varchar.size();++i){
+	t=ts.get();
+	if(t.kind!='a' || varchar[i]!=t.value){
+		ts << varchar.substr(0,i) << t;
+		return false;
+	}
+}
+t=ts.get();
+if(t.kind!='('){
+	ts << varchar << t;
+return false;
+}
+    while(t.kind != ')') {
+      t = ts.get();
+      if(t.kind == '0') {
+        string size = ""; 
+        while(t.kind != ' ' && t.kind != ')') {
+          size += t.value;
+          t = ts.get();
+        }		
+        cout << size << endl;
+		}
+		else{
+			ts << t;
+			return false;
+		}
+	  }    
+    return true;
+}
+
+bool check_column_name(Token_stream& ts) {
+bool return_value = true;
+Token t = ts.get();
+if(t.kind == '(') {
+	while(t.kind != ')') {
+		t = ts.get();
+			if(t.kind == 'a' || t.kind == '0') {
+				string column_names = "";
+				while(t.kind != ' ') {
+					column_names += t.value;
+					t = ts.get();
+					if(t.kind == ')'){
+						return false;
+					}
+					
+			}
+				if(!name_check(ts,"INTEGER") && !check_varchar(ts)){
+					return false;
+				}
+				cout << column_names << endl;
+				while(t.kind ==' ') ts >> t;
+				if(t.kind!=',' && t.kind!=')'){
+					return false;
+				}
+			}			
+			
+		}
+		return return_value;
+	}
+	return false;
+}
+	
+
+
+
+bool create(Token_stream& ts) {
+	return name_check(ts, "CREATE") && name_check(ts,"TABLE") && relation_name(ts) && check_column_name(ts) && name_check(ts,"PRIMARY") && name_check(ts,"KEY") ;
+}
+
+bool insert(Token_stream& ts){
+	return name_check(ts, "INSERT") && name_check(ts, "INTO") && relation_name(ts) && name_check(ts, "VALUES") && name_check(ts, "FROM");
+}
 bool show(Token_stream& ts){
-	return name_check(ts, "SHOW") && atomic_expr;
+	return name_check(ts, "SHOW") && atomic_expr(ts);
 }
 bool exit(Token_stream&ts){
 	return name_check(ts, "EXIT");
@@ -73,75 +163,9 @@ bool close(Token_stream& ts){
 bool open(Token_stream& ts){
 	return name_check(ts, "OPEN") && relation_name(ts);
 }
-
-bool create(Token_stream& ts) {
-	
-	string create = "";
-	Token t = ts.get();
-	vector<Token> tt; //keeps track of tokens that are cycle through
-	create += t.value;
-	tt.push_back(t);
-	while(t.kind == 'a' && (create.size() < 6) ){
-		t = ts.get();
-		create += t.value;
-		tt.push_back(t);
-		if(create == "CREATE"){
-			cout << "Created" << endl;
-			string table = "";
-			Token t = ts.get();
-			vector<Token> tt;
-			table += t.value;
-			cout << table.size() << endl;
-			tt.push_back(t);
-			while(t.kind == 'a' && (table.size() < 5)) {
-				t = ts.get();
-				table +=t.value;
-				tt.push_back(t);
-				}
-				if(table == "TABLE") {
-					cout <<"Sucess !!!!!! " << endl;
-					if(relation_name(ts)) {
-						cout <<" Done YAY! " << endl;
-						t = ts.get();
-						if(t.kind == '(') {
-							cout << " found ( ********************* " << endl;
-							t = ts.get();
-							while(t.kind != ')') {
-								cout << "i am here " << endl;
-								
-								t = ts.get();
-								if(t.kind == 'a' || t.kind == '0') {
-									cout << " reached here " << endl;
-									string column_names = "";
-									//t = ts.get();
-									//column_names += t.value;
-									while(t.kind != ',' && t.kind != ')') {
-										
-										column_names += t.value;
-										cout << "stuck here ? " << t.kind << endl;
-										t = ts.get();
-								}
-									cout << column_names << endl;
-							}
-						}
-								return true;
-					}
-				}
-			}
-		}
-			
-		
-	}
-	for(int i = 0; i<tt.size(); ++i){
-		ts.putback(tt[i]);
-	}
-	return false;
-	
-}
-
 bool command(Token_stream& ts)
 {
-	return open(ts) || close(ts) || write(ts) || exit(ts) || show(ts);
+	return open(ts) || close(ts) || write(ts) || exit(ts) || show(ts) || insert(ts) || create(ts);
 }
 bool query(Token_stream& ts)
 {
@@ -233,15 +257,16 @@ int main(){
   getline(cin, line);
   ts.ss << line;
   bool valid = true;
-  while(true)
   {
 	Token t = ts.get();
-	//cout << t.kind << ", " << t.value << endl;
 	if(t.kind == ';')
-		//break;
 		return 0;
 	ts.putback(t);
-	cout << program(ts) << endl;
+	if(program(ts)) {
+		cout << "Valid Syntax " << endl;
+	}
+	else 
+		cout << "Invalid Syntax " << endl;
   }
   return 0;
 }
