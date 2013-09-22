@@ -133,14 +133,22 @@ void Database:: Select(string attr_name, string condition, string cell_condition
 
 void Database::Update(string rel_name, string attr_name, string literal, string condition_attr, string condition, string condition_literal) {
 	Relation* r;
+	bool found = false;
 	for(int i = 0; i < relation.size(); i++)
 	{
 		if(rel_name == relation[i].name)
 		{
 			r = &relation[i];
+			found = true;
 			break;
 		}
 	}
+	
+	if(!found) {
+		cout << "Could not find a relation called " << rel_name << endl;
+		return;
+	}
+	
 	int attr_loc = r->findAttribute(condition_attr);    // Find the location of the attribute to be changed
 	if(attr_loc == -1)
 	{
@@ -240,13 +248,19 @@ void Database::Update(string rel_name, string attr_name, string literal, string 
 // Delete function is used to delete a certain tuple. it works pretty much like the update function.
 void Database::Delete(string rel_name, string condition_attr, string condition, string condition_literal) {
 	Relation* r;
+	bool found = false;
 	for(int i = 0; i < relation.size(); i++)
 	{
 		if(rel_name == relation[i].name)
 		{
 			r = &relation[i];
+			found = true;
 			break;
 		}
+	}
+	if(!found) {
+		cout << "Could not find a relation called " << rel_name << endl;
+		return;
 	}
 	int attr_loc = r->findAttribute(condition_attr);
 	if(attr_loc == -1)
@@ -391,7 +405,7 @@ void Database:: Create(string rel_name) {
 }
 
 
-//Delete a relation from the database
+/*//Delete a relation from the database
 void Database:: Delete(string rel_name) {
   for(int i = 0; i < relation.size(); i++)
   {
@@ -401,7 +415,7 @@ void Database:: Delete(string rel_name) {
 	}
   }
   cerr << "I did not find anything called " << rel_name << endl;
-}
+} */
 
 void Database:: Write(const string& rel_name) {
   cout << "Requires file I/O, will be done in the next part " << endl;
