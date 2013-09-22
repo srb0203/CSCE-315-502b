@@ -57,6 +57,16 @@ class Relation{//relation has a vector of attributes and a name. This is basical
       }
       return tuple;
     }
+	void setRow(int n, vector<Cell> row)
+	{
+		for(int i = 0; i < attr.size(); i++)
+			attr[i].cell[n] = row[i];
+	}
+	void deleteRow(int n)
+	{
+		for(int i = 0; i < attr.size(); i++)
+			attr[i].cell.erase(attr[i].cell.begin() + n);
+	}
 
     int getRowSize() {//returns the column length dispite the name (havent changed)
       return attr[0].getLength();
