@@ -364,18 +364,61 @@ void Database::Delete_attr(const string& rel_name,const string& attribute) {
   }
   cerr << "I did not find anything called "<< rel_name << endl;
 }
- 
- 
-// This function is used to change the name of a column
-void Database:: Rename(string rel_name,string new_name, string old_name) {
-  for (int i = 0; i < relation.size(); ++i){
-    if (rel_name == relation[i].name){
-      relation[i].Rename(new_name,old_name);
-      return;
-    }
-  }
-  cerr << "I did not find anything called "<< rel_name << endl;
+
+// void Database:: Rename(const string& newrel_name, const string& rel_name,vector<string> attr_names) {
+	// void Database:: Rename(const string& newrel_name, const string& rel_name,vector<string> attr_names) {
+	// for (int i = 0; i < relation.size(); ++i){
+		// if (rel_name == relation[i].name){
+			// Create(newrel_name);
+			// for(int i = 0; i < relation[i].getRowSize(); i++)
+				// {
+					// Insert(newrel_name.name, relation[i].getRow(i));
+				// }
+			// newrel_name.Rename(attr_names);
+			// return;
+		// }
+	// }
+  // cerr << "I did not find anything called "<< rel_name << endl;
+// }
+// }
+
+
+void Database:: Rename(const string& newrel_name, const string& rel_name,vector<string> attr_names) {
+	Create(newrel_name);
+	bool found = false;
+	int i1,i2;
+	for (int i = 0; i < relation.size(); ++i){
+		if (newrel_name == relation[i].name){
+		i1 =i;
+		break;
+		}
+	}
+	for (int i = 0; i < relation.size(); ++i){
+		if (rel_name == relation[i].name){
+			i2 =i;
+			found = true;
+			break;
+		}
+	}
+	if(!found) {
+		cout << "Relation " << rel_name << " not found " << endl;
+		return;
+	}
+	 for(int i = 0; i < relation[i2].getNumAttributes(); i++)
+	{
+		Attribute a = relation[i2].getAttribute(i);
+		relation[i1].add_attr(a.getName(), a.type);
+	}
+  
+    for(int i = 0; i < relation[i2].getRowSize(); i++)
+	{
+		Insert(relation[i1].name, relation[i2].getRow(i));
+	}
+	relation[i1].Rename(attr_names);
+
 }
+ 
+
 // This function is going to add columns in our table when we initially create a table. 
 // This allows us to have tables with different sizes. 
 void Database::AddColumn(const string& rel_name, const Header& h){
@@ -405,17 +448,7 @@ void Database:: Create(string rel_name) {
 }
 
 
-/*//Delete a relation from the database
-void Database:: Delete(string rel_name) {
-  for(int i = 0; i < relation.size(); i++)
-  {
-	if(rel_name == relation[i].name) {
-		relation.erase(relation.begin() + i);
-		return;
-	}
-  }
-  cerr << "I did not find anything called " << rel_name << endl;
-} */
+
 
 void Database:: Write(const string& rel_name) {
   cout << "Requires file I/O, will be done in the next part " << endl;
