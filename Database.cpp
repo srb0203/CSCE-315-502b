@@ -1,12 +1,14 @@
 #include "Database.h"
 #include <algorithm> 
+#include <iostream>
+#include <fstream>
 
 // Compute the projection of two relations
 void Database:: Project(vector<string> attr_name, string rel_name){
 	for (int i = 0; i < relation.size(); ++i){
 		if (rel_name == relation[i].name){
 			Relation new_projection;    // create a new relation
-			new_projection.name = "Projection";    // rename the relation 
+			new_projection.name = "Expression";    // rename the relation 
 			for (int j = 0; j < attr_name.size(); ++j){
 				int attr_loc;
 				attr_loc = (relation[i].findAttribute(attr_name[j]));
@@ -20,8 +22,12 @@ void Database:: Project(vector<string> attr_name, string rel_name){
 				cerr << "None of the attributes requested were found to be projected from '" << rel_name << "'." <<endl;
 				return;
 			}
-			else 
-				Projection = new_projection;
+			else {
+				for (int i = 0; i < relation.size(); ++i){
+					if(relation[i].name == "Expression")
+					relation[i] = new_projection;
+				}
+			}
 			return;
 		}
 	}	
@@ -36,7 +42,7 @@ void Database:: Select(string attr_name, string condition, string cell_condition
 			if (attr_loc != -1){
 				Relation new_selection = relation[i];
 				new_selection.clear_attr_cells();
-				new_selection.name = "Selection";
+				new_selection.name = "Expression";
 				vector<string> getCells = relation[i].attr[attr_loc].getCells();
 				vector<int> condition_metLoc;
 				
@@ -116,7 +122,11 @@ void Database:: Select(string attr_name, string condition, string cell_condition
 				else{
 					for (int j = 0; j < condition_metLoc.size(); ++j){
 						new_selection.Insert(relation[i].getRow(condition_metLoc[j]));
-						Selection = new_selection;
+						for (int i = 0; i < relation.size(); ++i){
+							if(relation[i].name == "Expression"){
+								relation[i] = new_selection;
+							}
+						}
 					}
 				}
 				return;
@@ -131,14 +141,14 @@ void Database:: Select(string attr_name, string condition, string cell_condition
 
 // Update function is used to update a certain cell that satisfies a particular condition. 
 
-void Database::Update(string rel_name, string attr_name, string literal, string condition_attr, string condition, string condition_literal) {
-	Relation* r;
+void Database::Update(string rel_name, string attr_name, string literal, string rel_name2) {
+	int i1, i2;
 	bool found = false;
 	for(int i = 0; i < relation.size(); i++)
 	{
 		if(rel_name == relation[i].name)
 		{
-			r = &relation[i];
+			i1 = i;
 			found = true;
 			break;
 		}
@@ -149,97 +159,29 @@ void Database::Update(string rel_name, string attr_name, string literal, string 
 		return;
 	}
 	
-	int attr_loc = r->findAttribute(condition_attr);    // Find the location of the attribute to be changed
-	if(attr_loc == -1)
+	found = false;
+	
+	for(int i = 0; i < relation.size(); i++)
 	{
-		cerr << "Could not find attribute: " << condition_attr << endl;
+		if(rel_name2 == relation[i].name)
+		{
+			i2 = i;
+			found = true;
+			break;
+		}
+	}
+	
+	if(!found) {
+		cout << "Could not find a relation called " << rel_name2 << endl;
 		return;
 	}
-	Relation selection = *r;
-	selection.clear_attr_cells();
-	selection.name = "Selection";
-	vector<string> cells = r->attr[attr_loc].getCells();
-	vector<int> condition_metLoc;
-
-  // look for different conditions 
-	if(condition == ">"){
-		if(r->attr[attr_loc].getType() == INT){
-			for (int j = 0; j < cells.size(); ++j){
-				int getCell = atoi(cells[j].c_str());//conversion from string to int
-				int cell_cond = atoi(condition_literal.c_str());
-				if (getCell > cell_cond){
-					condition_metLoc.push_back(j);
-					}
-			}
-		}
-		else
-			cerr << "The attribute '" << condition_attr << "' in relation '" << rel_name << "' is not of int type." << endl;
-	}
-	else if(condition == "<"){
-		if(r->attr[attr_loc].getType() == INT){
-			for (int j = 0; j < cells.size(); ++j){
-				int getCell = atoi(cells[j].c_str());//conversion from string to int
-				int cell_cond = atoi(condition_literal.c_str());
-				if (getCell < cell_cond){
-					condition_metLoc.push_back(j);
-					}
-			}
-		}
-		else
-			cerr << "The attribute '" << condition_attr << "' in relation '" << rel_name << "' is not of int type." << endl;
-	}
-	else if(condition == "<="){
-		if(r->attr[attr_loc].getType() == INT){
-			for (int j = 0; j < cells.size(); ++j){
-				int getCell = atoi(cells[j].c_str());//conversion from string to int
-				int cell_cond = atoi(condition_literal.c_str());
-				if (getCell <= cell_cond){
-					condition_metLoc.push_back(j);
-					}
-			}
-		}
-		else
-			cerr << "The attribute '" << condition_attr << "' in relation '" << rel_name << "' is not of int type." << endl;
-	}
-	else if(condition == ">="){
-		if(r->attr[attr_loc].getType() == INT){
-			for (int j = 0; j < cells.size(); ++j){
-				int getCell = atoi(cells[j].c_str());//conversion from string to int
-				int cell_cond = atoi(condition_literal.c_str());
-				if (getCell >= cell_cond){
-					condition_metLoc.push_back(j);
-					}
-			}
-		}
-		else
-			cerr << "The attribute '" << condition_attr << "' in relation '" << rel_name << "' is not of int type." << endl;
-	}
-	else if(condition == "=="){
-		for (int j = 0; j < cells.size(); ++j){
-			if (cells[j] == condition_literal){
-				condition_metLoc.push_back(j);
-				}
-		}
-	}
-	else if(condition == "!="){
-		for (int j = 0; j < cells.size(); ++j){
-			if (cells[j] != condition_literal){
-				condition_metLoc.push_back(j);
-				}
-		}
-	}
-	else 
-		cerr << "Not a valid condition, use '>', '<', or '=='." << endl;
-	if(condition_metLoc.size() == 0){
-			cerr << "No cells were found to meet that condition in attribute '" << condition_attr << "' of relation '" << rel_name << "'." <<endl;
-			return;
-		}
-	else{
-		for (int j = 0; j < condition_metLoc.size(); ++j){
-			vector<Cell> row = r->getRow(condition_metLoc[j]);
-			int attr_loc = r->findAttribute(attr_name);
-			row[attr_loc] = literal;
-			r->setRow(condition_metLoc[j], row);
+	
+	for(int i = 0; i < relation[i1].attr.size(); i++)
+	{
+		if(relation[i1].attr[i].name == attr_name)
+		{
+			for(int j = 0; j < relation[i1].attr[i].cell.size(); j++)
+				relation[i1].attr[i].cell[j] = literal;
 		}
 	}
 	
@@ -381,7 +323,57 @@ void Database::Delete_attr(const string& rel_name,const string& attribute) {
   // cerr << "I did not find anything called "<< rel_name << endl;
 // }
 // }
-
+Relation Database:: Copy_table(const string rel_name, const string newrel_name) {
+	if(rel_name == newrel_name)
+	{
+		for(int i = 0; i < relation.size(); i++)
+		{
+			if(newrel_name == relation[i].name)
+			{
+				return relation[i];
+			}
+		}
+	}
+	for(int i = 0; i < relation.size(); i++)
+	{
+		if(newrel_name == relation[i].name)
+		{
+			relation.erase(relation.begin() + i);
+			break;
+		}
+	}
+	Create(newrel_name);
+	bool found = false;
+	int i1,i2;
+	for (int i = 0; i < relation.size(); ++i){
+		if (newrel_name == relation[i].name){
+		i1 =i;
+		break;
+		}
+	}
+	for (int i = 0; i < relation.size(); ++i){
+		if (rel_name == relation[i].name){
+			i2 =i;
+			found = true;
+			break;
+		}
+	}
+	if(!found) {
+		cout << "Relation " << rel_name << " not found " << endl;
+		return Relation();
+	}
+	 for(int i = 0; i < relation[i2].getNumAttributes(); i++)
+	{
+		Attribute a = relation[i2].getAttribute(i);
+		relation[i1].add_attr(a.getName(), a.type);
+	}
+  
+    for(int i = 0; i < relation[i2].getRowSize(); i++)
+	{
+		Insert(relation[i1].name, relation[i2].getRow(i));
+	}
+	return relation[i1];
+}
 
 void Database:: Rename(const string& newrel_name, const string& rel_name,vector<string> attr_names) {
 	Create(newrel_name);
@@ -447,11 +439,59 @@ void Database:: Create(string rel_name) {
   relation.push_back(Relation(rel_name));
 }
 
-
+void Database:: Open(const string& rel_name) {
+/*vector<string> rel_names;
+vector<Type> attr_type;
+vector<string> operators;
+vector<string> attr_value;
+  ifstream infile((rel_name + ".db").c_str());
+  string line;
+  while(getline(infile, line))
+  {
+    Token_stream ts;
+    ts.ss.clear();
+    ts.ss.str("");
+    ts.ss << line;
+	program(ts);
+	rel_names.clear();
+	attr_type.clear();
+	operators.clear();
+	attr_value.clear();
+  }*/
+}
 
 
 void Database:: Write(const string& rel_name) {
-  cout << "Requires file I/O, will be done in the next part " << endl;
+	ofstream file;
+	file.open((rel_name + ".db").c_str());
+	Attribute primary;
+	for(int i = 0; i < relation.size(); i++)
+	{
+		if(relation[i].name != rel_name)
+			continue;
+		file << "CREATE TABLE " << rel_name << " (";
+		for(int j = 0; j < relation[i].attr.size(); j++)
+		{
+			if(j == 0)
+				primary = relation[i].attr[j];
+			file << relation[i].attr[j].name << " " << ((relation[i].attr[j].type == INT) ? "INTEGER" : "VARCHAR") << "(1)";
+			if(j + 1 < relation[i].attr.size())
+				file << ", ";
+		}
+		file << ") PRIMARY KEY (" << primary.name << ");\n";
+		for(int j = 0; j < relation[i].getRowSize(); j++)
+		{
+			vector<string> row = relation[i].getRow(j);
+			file << "INSERT INTO " << rel_name << " VALUES FROM (";
+			for(int k = 0; k < relation[i].attr.size(); k++)
+			{
+				file << ((relation[i].attr[k].type == INT) ? row[k] : ("\"" + row[k] + "\""));
+				if(k + 1 < relation[i].attr.size())
+					file << ", ";
+			}
+			file << ");\n";
+		}
+	}
 }
 
 
@@ -471,6 +511,8 @@ Relation& Database::operator[](const string& s){
 
 // Computes the union of two relations and stores it in a new relation
 void Database::Union(const string& rel_name1, const string& rel_name2,const string& rel_name3) {
+//for(int i = 0; i < relation.size(); i++)
+	//Show(relation[i].name);
   int i1,i2,i3;
 
   // Find if the relations exist in the database and store their index
@@ -484,7 +526,7 @@ void Database::Union(const string& rel_name1, const string& rel_name2,const stri
   for (int i = 0; i < relation.size(); ++i){
     if (rel_name1 == relation[i].name){
       i1 =i;
-      break;
+	  break;
     }
   }
   for (int i = 0; i < relation.size(); ++i){
@@ -499,7 +541,6 @@ void Database::Union(const string& rel_name1, const string& rel_name2,const stri
       break;
     }
   }
-
   // Check if the number of columns in the two table is the same
   if(relation[i2].getNumAttributes() != relation[i3].getNumAttributes())
   {
@@ -541,6 +582,75 @@ void Database::Union(const string& rel_name1, const string& rel_name2,const stri
         }
       }
 	  if(!found)
+		Insert(relation[i1].name,relation[i3].getRow(j));
+    }
+}
+
+void Database::Intersection(const string& rel_name1, const string& rel_name2,const string& rel_name3) {
+  int i1,i2,i3;
+
+  // Find if the relations exist in the database and store their index
+  for(int i = 0; i < relation.size(); i++)
+  {
+	if(rel_name1 == relation[i].name) {
+		relation.erase(relation.begin() + i);
+	}
+  }
+  Create(rel_name1);
+  for (int i = 0; i < relation.size(); ++i){
+    if (rel_name1 == relation[i].name){
+      i1 =i;
+	  break;
+    }
+  }
+  for (int i = 0; i < relation.size(); ++i){
+    if (rel_name2 == relation[i].name){
+      i2 =i;
+      break;
+    }
+  }
+  for (int i = 0; i < relation.size(); ++i){
+    if (rel_name3 == relation[i].name){
+      i3 = i;
+      break;
+    }
+  }
+  // Check if the number of columns in the two table is the same
+  if(relation[i2].getNumAttributes() != relation[i3].getNumAttributes())
+  {
+	cerr << "Size does not match " << endl;
+	return;
+	}
+
+  // Check if the attributes have the same type
+  for(int i=0; i<relation[i2].getNumAttributes();i++){
+    if(relation[i2].getAttributeType(i) != relation[i3].getAttributeType(i)) {
+      cerr << "Attributes do not have the same type, cannot insert " << endl;
+      return;
+    }
+  }
+  
+  for(int i = 0; i < relation[i2].getNumAttributes(); i++)
+  {
+	Attribute a = relation[i2].getAttribute(i);
+	relation[i1].add_attr(a.getName(), a.type);
+  }
+
+
+    //Create(rel_name2+rel_name3+"Union");
+    bool insrt = true;
+
+    int i2Rowsize = relation[i2].getRowSize();
+    int jrowsize = relation[i3].getRowSize();
+    for(int j=0; j < jrowsize; j++) {
+		bool found = false;
+      for(int i=0; i < relation[i2].getRowSize(); i++) {
+        if(relation[i3].getRow(j) == relation[i2].getRow(i)) {
+		found = true;
+          break;
+        }
+      }
+	  if(found)
 		Insert(relation[i1].name,relation[i3].getRow(j));
     }
 }
