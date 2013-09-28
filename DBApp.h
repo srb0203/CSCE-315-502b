@@ -24,6 +24,8 @@ class DBApp {
 		void ShowCustomers();
 		void Create_Customer_table();
 		void SearchCarsByName();
+		void ShowCarsByManufacturers(string table_name);
+		void ShowCustomerNames();
 };
 
 #endif
