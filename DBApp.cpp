@@ -14,6 +14,21 @@ void DBApp:: CreateTable() {
 	p.parse("INSERT INTO Shipments VALUES FROM (004,\"Audi\", \"A8\", 2015,43);");
 }
 
+void DBApp:: Create_Customer_table() {
+	p.parse("CREATE TABLE Customers (Customer_ID INTEGER, FirstName VARCHAR(1), LastName VARCHAR(1), Car_bought VARCHAR(20)) PRIMARY KEY (Customer_ID);");
+	p.parse("INSERT INTO Customers VALUES FROM (111,\"Saurabh\", \"Mishra\", \"Nissan\");");
+	p.parse("INSERT INTO Customers VALUES FROM (112,\"Bradley\", \"Abbot\", \"Audi\");");
+	p.parse("INSERT INTO Customers VALUES FROM (113,\"Michael\", \"Karnes\", \"Mercedes\");");
+}
+
+void DBApp:: SearchCarsByName() {
+	string car_name;
+	cout << "Enter the name of tha car you want to search " << endl;
+	cin >> car_name;
+	p.parse("Search_result <- select (Name == \""+car_name+"\""+") cars;");
+	p.parse("SHOW Search_result;");
+	cout << "Search_result <- select (Name == \""+car_name+"\""+");"<< endl;
+}
 
 void DBApp:: AddCar(string table_name) {
 	string carID, name, model, year, engine;
@@ -64,6 +79,10 @@ void DBApp:: ShowTable(string tablename) {
 	return;
 }
 
+void DBApp:: ShowCustomers() {
+	p.parse("SHOW Customers;");
+}
+
 void DBApp:: DeleteCar(string car_name, string table_name) {
 	//cout << "\nDELETE FROM "+table_name+" WHERE (name == "+car_name+");" << endl;
 	p.parse("DELETE FROM "+table_name+" WHERE (name == "+car_name+");");
@@ -81,7 +100,8 @@ void DBApp:: Exit() {
 }
 
 void DBApp:: test() {
-	p.parse("UPDATE cars SET Name = 0 WHERE Name == Chevrolet;");
+	//p.parse("UPDATE cars SET Name = 0 WHERE Name == Chevrolet;");
+	p.parse("Search_result <- select (Name == \"Audi\") cars;");
 	//p.parse("DELETE FROM cars WHERE (Name == Audi);");
 	p.parse("SHOW cars;");
 }
@@ -92,6 +112,7 @@ int x;
 
  DBApp d;
  d.CreateTable();
+ d.Create_Customer_table();
  //d.test();
 // d.CreateTable();
  while(true) {
@@ -103,8 +124,10 @@ int x;
 		cout << "3. Show Cars and their ID " << endl;
 		cout << "4. Update information about a Car in the warehouse " << endl;
 		cout << "5. Show table of cars " << endl;
-		cout << "6. Show the cars that are not in the warehouse but are in the shipment " << endl;
-		cout << "7. Exit " << endl;
+		cout << "6. Show Customers " << endl;
+		cout << "7. Show the cars that are not in the warehouse but are in the shipment " << endl;
+		cout << "8. Search cars by name " << endl;
+		cout << "9. Exit " << endl;
 	
 		cin >> x;
 		
@@ -148,15 +171,23 @@ int x;
 		}			
 		
 		if(x == 6) {
-			d.Diff();
+			d.ShowCustomers();
 		}
 		
 		if(x == 7) {
+			d.Diff();
+		}
+		
+		if(x == 8) {
+			d.SearchCarsByName();
+		}
+		
+		if(x == 9) {
 			cout << " \n         Good Bye :) " << endl;
 			d.Exit();
 		}	
 		
-		if(x == 8) {
+		if(x == 10) {
 			d.test();
 		}
 		
