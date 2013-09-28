@@ -21,6 +21,9 @@ class DBApp {
 		void AddCar(string table_name);
 		void Exit();
 		void Diff();
+		void ShowCustomers();
+		void Create_Customer_table();
+		void SearchCarsByName();
 };
 
 #endif
