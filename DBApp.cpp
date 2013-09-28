@@ -8,6 +8,7 @@ void DBApp:: CreateTable() {
 	p.parse("CREATE TABLE Shipments (Car_ID INTEGER, Name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);");
 	p.parse("INSERT INTO cars VALUES FROM (001,\"Audi\", \"R8\", 2013,34);");
 	p.parse("INSERT INTO cars VALUES FROM (002,\"Chevrolet\", \"Cobalt\", 2013,36);");
+	p.parse("INSERT INTO cars VALUES FROM (002,\"Chevrolet\", \"Malibu\", 2014,56);");
 	p.parse("INSERT INTO cars VALUES FROM (003,\"Nissan\", \"Altima\", 2011,38);");
 	p.parse("INSERT INTO cars VALUES FROM (004,\"Audi\", \"A8\", 2014,43);");
 	p.parse("INSERT INTO Shipments VALUES FROM (004,\"Audi\", \"A8\", 2015,43);");
@@ -30,6 +31,11 @@ void DBApp:: SearchCarsByName() {
 	cout << "Search_result <- select (Name == \""+car_name+"\""+");"<< endl;
 }
 
+void DBApp:: ShowCustomerNames() {
+	p.parse("Customer_names <- project(FirstName,LastName) Customers;");
+	p.parse("SHOW Customer_names;");
+}
+
 void DBApp:: AddCar(string table_name) {
 	string carID, name, model, year, engine;
 	cout << "Enter the Name of the car " << endl;
@@ -50,6 +56,46 @@ void DBApp:: AddCar(string table_name) {
 void DBApp:: Diff() {
 	p.parse("NotInWarehouse <- Shipments - cars;");
 	p.parse("SHOW NotInWarehouse;");
+}
+
+void DBApp:: ShowCarsByManufacturers(string table_name) { 
+	int x;
+	cout << "Please select the manufacturer of the car you want to see" << endl;
+	cout << "1. General Motors " << endl;
+	cout << "2. Chevrolet " << endl;
+	cout << "3. Mercedes " << endl;
+	cout << "4. Audi " << endl;
+	cout << "5. Nissan " << endl;
+	cin >> x;
+	
+	if(x == 1) {
+	}
+	
+	if(x == 2) {
+		p.parse("Chevrolet <- select (Name == \"Chevrolet\") "+table_name+";");
+		p.parse("SHOW Chevrolet;");
+	}
+	
+	if(x == 3) {
+		p.parse("Mercedes <- select (Name == \"Mercedes\") "+table_name+";");
+		p.parse("SHOW Mercedes;");
+	}
+	
+	if(x == 4) {
+		p.parse("Audi <- select (Name == \"Audi\") "+table_name+";");
+		p.parse("SHOW Audi;");
+	}
+	
+	if(x == 5) {
+		p.parse("Nissan <- select (Name == \"Nissan\") "+table_name+";");
+		p.parse("SHOW Nissan;");
+	}
+	
+	else {
+		cout << "Wrong input " << endl;
+		return;
+	}
+	
 }
 
 void DBApp:: UpdateCar(string table_name) {
@@ -127,7 +173,9 @@ int x;
 		cout << "6. Show Customers " << endl;
 		cout << "7. Show the cars that are not in the warehouse but are in the shipment " << endl;
 		cout << "8. Search cars by name " << endl;
-		cout << "9. Exit " << endl;
+		cout << "9. Show cars by manufacturers " << endl;
+		cout << "10. Show the names of all customers " << endl;
+		cout << "11. Exit " << endl;
 	
 		cin >> x;
 		
@@ -183,11 +231,23 @@ int x;
 		}
 		
 		if(x == 9) {
+			string table_name;
+			cout << "Enter the name of the table,\"cars\" or \"Shipments\" " << endl;
+			cin >> table_name;
+			d.ShowCarsByManufacturers(table_name);
+		}
+		
+		if(x == 10) {
+			cout << "\nHere are all the customers who bought cars from us :)" << endl;
+			d.ShowCustomerNames();
+		}
+		
+		if(x == 11) {
 			cout << " \n         Good Bye :) " << endl;
 			d.Exit();
 		}	
 		
-		if(x == 10) {
+		if(x == 12) {
 			d.test();
 		}
 		
