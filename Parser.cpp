@@ -1,20 +1,18 @@
 #include <iostream>
 #include <fstream>
-#include "Database.h"
-#include "Token.h"
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
+#include "Parser.h"
+#include "Token.h"
 
-using namespace std;
-//Relation storage
 string rel_name;
 vector<string> rel_names;
 vector<string> create_names;
 
 //Operations storage
 vector<string> operators;
-vector<string> operands;
+vector<Token> operands;
 
 //Attribute storage
 vector<string> attr_value;
@@ -29,6 +27,9 @@ vector<Token> conditions;
 Database d;
 
 Token_stream ts;
+
+using namespace std;
+//Relation storage
 bool identifier(Token_stream& ts, string kind)
 {
   Token t = ts.get();
@@ -92,14 +93,14 @@ bool union_diff_proj(Token_stream& ts){
 	Relation rel1;
 	if(operator_check(ts, '+'))
 	{
-		Relation rel1 = d.Copy_table("AtomicExpression", "AtomicLeft");
+		Relation rel1 = d.Copy_table(rel_names.back(), "AtomicLeft");
 		rel_names.pop_back();
 		if(!atomic_expr(ts))
 		{
 			ts.copy(tscopy);
 			return false;
 		}
-		Relation rel2 = d.Copy_table("AtomicExpression", "AtomicRight");
+		Relation rel2 = d.Copy_table(rel_names.back(), "AtomicRight");
 		rel_names.pop_back();
 		for(int i = 0; i < d.relation.size(); i++)
 		{
@@ -115,14 +116,14 @@ bool union_diff_proj(Token_stream& ts){
 	}
 	else if(operator_check(ts, '-'))
 	{
-		Relation rel1 = d.Copy_table("AtomicExpression", "AtomicLeft");
+		Relation rel1 = d.Copy_table(rel_names.back(), "AtomicLeft");
 		rel_names.pop_back();
 		if(!atomic_expr(ts))
 		{
 			ts.copy(tscopy);
 			return false;
 		}
-		d.Copy_table("AtomicExpression", "AtomicRight");
+		Relation rel2 = d.Copy_table(rel_names.back(), "AtomicRight");
 		rel_names.pop_back();
 		for(int i = 0; i < d.relation.size(); i++)
 		{
@@ -138,14 +139,14 @@ bool union_diff_proj(Token_stream& ts){
 	}
 	else if(operator_check(ts, '*'))
 	{
-		Relation rel1 = d.Copy_table("AtomicExpression", "AtomicLeft");
+		Relation rel1 = d.Copy_table(rel_names.back(), "AtomicLeft");
 		rel_names.pop_back();
 		if(!atomic_expr(ts))
 		{
 			ts.copy(tscopy);
 			return false;
 		}
-		Relation rel2 = d.Copy_table("AtomicExpression", "AtomicRight");
+		Relation rel2 = d.Copy_table(rel_names.back(), "AtomicRight");
 		rel_names.pop_back();
 		for(int i = 0; i < d.relation.size(); i++)
 		{
@@ -177,16 +178,20 @@ bool attribute_name(Token_stream& ts, string kind)
 bool operand(Token_stream& ts)
 {
   if(attribute_name(ts, "attr"))
+  {
+	operands.push_back(Token('a', attr_value.back()));
+	attr_value.pop_back();
     return true;
+	}
   Token t = ts.get();
   if(t.kind == '8') {
 	stringstream ss;
 	ss << t.value;
-	operands.push_back(ss.str());
+	operands.push_back(t);
     return true;
 	}
 if(t.kind == '"'){
-	operands.push_back(t.str);
+	operands.push_back(t);
 	return true;
 }
   ts.putback(t);
@@ -204,9 +209,11 @@ bool op(Token_stream& ts)
   return false;
 }
 
+bool condition(Token_stream& ts);
+
 bool comparison(Token_stream& ts)
 {  
-  return (operand(ts) && op(ts) && operand(ts)) || (ts.get().kind == '(' && op(ts) && ts.get().kind == ')');
+  return (operand(ts) && op(ts) && operand(ts)) || (ts.get().kind == '(' && condition(ts) && ts.get().kind == ')');
 }
 
 bool conjunction(Token_stream& ts)
@@ -242,8 +249,19 @@ bool selection(Token_stream& ts)
 {
 	bool ret = name_check(ts, "select") && ts.get().kind == '(' && condition(ts) && ts.get().kind == ')' && atomic_expr(ts);
 	if(ret){//(string attr_name, string condition, string cell_condition, string rel_name)
-		d.Select( attr_value.back(), operators.back(), operands.back(), rel_names.back());
-		attr_value.pop_back();
+		//cout << "Select(" << attr_value.back() << ", " << operators.back() << ", " << operands.back() << ", " << ");" << endl;
+		Token back = operands.back();
+		operands.pop_back();
+		if(back.kind == '8')
+		{
+			stringstream ss;
+			ss << back.value;
+			d.SelectLiteral( operands.back().str, operators.back(), ss.str(), rel_names.back());
+		}
+		else if(back.kind == '"')
+			d.SelectLiteral( operands.back().str, operators.back(), back.str, rel_names.back());
+		else if(back.kind == 'a')
+			d.SelectAttribute(operands.back().str, operators.back(), back.str, rel_names.back());
 		operators.pop_back();
 		operands.pop_back();
 		rel_names.pop_back();
@@ -251,8 +269,18 @@ bool selection(Token_stream& ts)
 		while(!conditions.empty())
 		{
 			d.Copy_table("Expression", "AtomicRight");
-			d.Select( attr_value.back(), operators.back(), operands.back(), rel_names.back());
-			attr_value.pop_back();
+			Token back = operands.back();
+			operands.pop_back();
+			if(back.kind == '8')
+			{
+				stringstream ss;
+				ss << back.value;
+				d.SelectLiteral( operands.back().str, operators.back(), ss.str(), rel_names.back());
+			}
+			else if(back.kind == '"')
+				d.SelectLiteral( operands.back().str, operators.back(), back.str, rel_names.back());
+			else if(back.kind == 'a')
+				d.SelectAttribute(operands.back().str, operators.back(), back.str, rel_names.back());
 			operators.pop_back();
 			operands.pop_back();
 			rel_names.pop_back();
@@ -285,7 +313,15 @@ bool projection(Token_stream& ts)
 {
   bool ret = name_check(ts, "project") && ts.get().kind == '(' && attribute_list(ts) && ts.get().kind == ')' && atomic_expr(ts);
   if(ret){//Project(vector<string> attr_name, string rel_name);
-	d.Project(attr_list, rel_names.back());
+	try
+	{
+		d.Project(attr_list, rel_names.back());
+	}
+	catch(string str)
+	{
+		cerr << str << endl;
+		return false;
+	}
 	attr_list.clear();
 	rel_names.pop_back();
 	rel_names.push_back("Expression");
@@ -312,7 +348,6 @@ bool expr(Token_stream& ts){
   ret = ret || atomic_expr(ts);
   if(ret)
   {
-	cout << "Expression: " << rel_names.back() << endl;
 	d.Copy_table(rel_names.back(), "Expression");
 	rel_names.pop_back();
 	rel_names.push_back("Expression");
@@ -324,9 +359,9 @@ bool expr(Token_stream& ts){
 bool atomic_expr(Token_stream& ts){
   if(relation_name(ts))
   {
-	d.Copy_table(rel_names.back(), "AtomicExpression");
-	rel_names.pop_back();
-	rel_names.push_back("AtomicExpression");
+	//d.Copy_table(rel_names.back(), "AtomicExpression");
+	//rel_names.pop_back();
+	//rel_names.push_back("AtomicExpression");
     return true;
 	}
   Token t = ts.get();
@@ -415,11 +450,11 @@ bool type(Token_stream& ts)
 	attr_type.push_back(INT); 
 		return true;
 	}
+	return false;
 }
 
 bool typed_attribute_list(Token_stream& ts)
 {
-	cout << "typed attribute list " << endl;
   bool valid = attribute_name(ts, "attr") && type(ts);
   if(!valid)
     return false;
@@ -456,8 +491,18 @@ bool _delete(Token_stream& ts)
 {
 	if(name_check(ts, "DELETE") && name_check(ts, "FROM") && relation_name(ts) && name_check(ts, "WHERE") && (ts.get().kind == '(' && condition(ts) && ts.get().kind == ')')) {
 	string rel_name = rel_names.back();
-		d.Select( attr_value.back(), operators.back(), operands.back(), rel_names.back());
-	attr_value.pop_back();
+	Token back = operands.back();
+	operands.pop_back();
+	if(back.kind == '8')
+	{
+		stringstream ss;
+		ss << back.value;
+		d.SelectLiteral( operands.back().str, operators.back(), ss.str(), rel_names.back());
+	}
+	else if(back.kind == '"')
+		d.SelectLiteral( operands.back().str, operators.back(), back.str, rel_names.back());
+	else if(back.kind == 'a')
+			d.SelectAttribute(operands.back().str, operators.back(), back.str, rel_names.back());
 	operators.pop_back();
 	operands.pop_back();
 	rel_names.pop_back();
@@ -465,8 +510,18 @@ bool _delete(Token_stream& ts)
 	while(!conditions.empty())
 	{
 		d.Copy_table("Expression", "AtomicRight");
-		d.Select( attr_value.back(), operators.back(), operands.back(), rel_names.back());
-		attr_value.pop_back();
+		Token back = operands.back();
+		operands.pop_back();
+		if(back.kind == '8')
+		{
+			stringstream ss;
+			ss << back.value;
+			d.SelectLiteral( operands.back().str, operators.back(), ss.str(), rel_names.back());
+		}
+		else if(back.kind == '"')
+			d.SelectLiteral( operands.back().str, operators.back(), back.str, rel_names.back());
+		else if(back.kind == 'a')
+				d.SelectAttribute(operands.back().str, operators.back(), back.str, rel_names.back());
 		operators.pop_back();
 		operands.pop_back();
 		rel_names.pop_back();
@@ -488,24 +543,21 @@ bool _delete(Token_stream& ts)
 	d.Difference(rel_name, "AtomicLeft", "AtomicRight");
 		return true;
 	}
+	return false;
 }
 
 bool create(Token_stream& ts)
 {
   if(name_check(ts, "CREATE") && name_check(ts, "TABLE") && relation_name(ts) && (ts.get().kind == '(' && typed_attribute_list(ts) && ts.get().kind == ')')
     && name_check(ts, "PRIMARY") && name_check(ts, "KEY") && (ts.get().kind == '(' && attribute_list(ts) && ts.get().kind == ')')) {
-	
-	for(int i=0;i<create_names.size();i++) {
-		cout << create_names[i] << endl;
-	}
 
 	d.Create(create_names[0]);
 		for(int i=0;i<attr_type.size(); i++) {	 
 		d.AddColumn(create_names[0], Header(create_names[i+1], attr_type[i]));		
 	}
-	attr_type.clear();
 	return true;
 }
+	return false;
 }
 
 bool update(Token_stream& ts)
@@ -519,8 +571,18 @@ bool update(Token_stream& ts)
   ret = ret && name_check(ts, "WHERE") && condition(ts);
   if(ret)
   {//void Update(string rel_name, string attr_name, string literal, string condition_attr, string condition, string condition_literal);
-	d.Select( attr_value.back(), operators.back(), operands.back(), rel_names.back());
-	attr_value.pop_back();
+	Token back = operands.back();
+	operands.pop_back();
+	if(back.kind == '8')
+	{
+		stringstream ss;
+		ss << back.value;
+		d.SelectLiteral( operands.back().str, operators.back(), ss.str(), rel_names.back());
+	}
+	else if(back.kind == '"')
+		d.SelectLiteral( operands.back().str, operators.back(), back.str, rel_names.back());
+	else if(back.kind == 'a')
+		d.SelectAttribute(operands.back().str, operators.back(), back.str, rel_names.back());
 	operators.pop_back();
 	operands.pop_back();
 	rel_names.pop_back();
@@ -528,8 +590,18 @@ bool update(Token_stream& ts)
 	while(!conditions.empty())
 	{
 		d.Copy_table("Expression", "AtomicRight");
-		d.Select( attr_value.back(), operators.back(), operands.back(), rel_names.back());
-		attr_value.pop_back();
+		Token back = operands.back();
+		operands.pop_back();
+		if(back.kind == '8')
+		{
+			stringstream ss;
+			ss << back.value;
+			d.SelectLiteral( operands.back().str, operators.back(), ss.str(), rel_names.back());
+		}
+		else if(back.kind == '"')
+			d.SelectLiteral( operands.back().str, operators.back(), back.str, rel_names.back());
+		else if(back.kind == 'a')
+			d.SelectAttribute(operands.back().str, operators.back(), back.str, rel_names.back());
 		operators.pop_back();
 		operands.pop_back();
 		rel_names.pop_back();
@@ -548,19 +620,30 @@ bool update(Token_stream& ts)
 	}
 	for(int i = 0; i < lit_list.size(); i++)
 	{
+		d.Copy_table(rel_name, "AtomicExpression");
+		d.Difference(rel_name, "AtomicExpression", "Expression");
 		d.Update("Expression", attr_list[i], lit_list[i], "Expression");
-		d.Copy_table("Expression", rel_name);
+		d.Copy_table(rel_name, "AtomicExpression");
+		d.Union(rel_name, "AtomicExpression", "Expression");
 	}
 }
   return ret;
 }
 
-bool show(Token_stream& ts){
-  
-  if( name_check(ts, "SHOW") && atomic_expr(ts)) {
-	d.Show(rel_names[0]);
-	rel_names.clear();
-	return true;
+bool show(Token_stream& ts)
+{
+	if( name_check(ts, "SHOW") && atomic_expr(ts))
+	{
+		try
+		{
+			d.Show(rel_names[0]);
+		}
+		catch(string s)
+		{
+			cerr << s << endl;
+			return false;
+		}
+		return true;
 	}
 }
 bool exit(Token_stream&ts){
@@ -590,6 +673,8 @@ bool query(Token_stream& ts)
 {
   bool ret = relation_name(ts) && operator_check(ts, ':');
   //cout << "query1: " << ret << endl;
+  if(!ret)
+	return false;
   string rel1 = rel_names.back();
   ret = ret && expr(ts);
   d.Copy_table("Expression", rel1);
@@ -609,7 +694,30 @@ bool program(Token_stream& ts)
 {
   return (command(ts) || query(ts)) && termination (ts);
 }
-int main(){
+
+void Parser::parse(string line)
+{
+	cout << "Input line: " << line << endl;
+	Token_stream ts;
+	ts.ss.clear();
+	ts.ss.str("");
+	ts.ss << line;
+	rel_names.clear();
+	attr_type.clear();
+	attr_list.clear();
+	operators.clear();
+	attr_value.clear();
+	lit_list.clear();
+	conditions.clear();
+	create_names.clear();
+	operands.clear();
+	if(!program(ts))
+	  cout << "THIS IS WRONG" << endl;
+	else
+	  cout << " VALID SYNTAX " << endl;
+}
+
+/*int main(){
 	d.Create("a");
 	d.AddColumn("a", Header("Str1", STRING));
 	d.AddColumn("a", Header("Str2", INT));
@@ -641,13 +749,16 @@ int main(){
       cout << " VALID SYNTAX " << endl;
 	rel_names.clear();
 	attr_type.clear();
+	attr_list.clear();
 	operators.clear();
 	attr_value.clear();
 	lit_list.clear();
 	conditions.clear();
+	create_names.clear();
+	operands.clear();
   }
 
   return 0;
-}
+}*/
 
 
