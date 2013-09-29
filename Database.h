@@ -30,7 +30,7 @@ class Database {
 	void Write(const string& rel_name);
 	void Show(string rel_name);
 	Relation Copy_table(const string rel_name1, const string rel_name2);
-	//void Rename(string rel_name,string new_name, string old_name);
+	//void Rename(strding rel_name,string new_name, string old_name);
 	void Rename(const string& newrel_name, const string& rel_name,vector<string> attr_names);
 	Relation& operator[](const string& s);
 	void Delete_attr(const string& rel_name,const string& attribute);
