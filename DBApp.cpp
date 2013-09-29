@@ -1,39 +1,43 @@
 #include "DBApp.h"
 
 void DBApp:: CreateTable() {
-	p.parse("CREATE TABLE cars (Car_ID INTEGER, Name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);");
-	p.parse("INSERT INTO cars VALUES FROM (5,\"Joe\", \"cat\", 4,6);");
-	p.parse("CREATE TABLE hello (carid INTEGER, name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);");
-	p.parse("INSERT INTO cars VALUES FROM (7,\"bob\", \"the builder\", 46,67);");
-	p.parse("CREATE TABLE Shipments (Car_ID INTEGER, Name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);");
-	p.parse("INSERT INTO cars VALUES FROM (001,\"Audi\", \"R8\", 2013,34);");
-	p.parse("INSERT INTO cars VALUES FROM (002,\"Chevrolet\", \"Cobalt\", 2013,36);");
-	p.parse("INSERT INTO cars VALUES FROM (002,\"Chevrolet\", \"Malibu\", 2014,56);");
-	p.parse("INSERT INTO cars VALUES FROM (003,\"Nissan\", \"Altima\", 2011,38);");
-	p.parse("INSERT INTO cars VALUES FROM (004,\"Audi\", \"A8\", 2014,43);");
-	p.parse("INSERT INTO Shipments VALUES FROM (004,\"Audi\", \"A8\", 2015,43);");
-	p.parse("INSERT INTO Shipments VALUES FROM (004,\"Audi\", \"A8\", 2015,43);");
+	p.parse("CREATE TABLE cars (Car_ID INTEGER, Name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);", true);
+	p.parse("INSERT INTO cars VALUES FROM (5,\"Joe\", \"cat\", 4,6);", true);
+	p.parse("CREATE TABLE hello (carid INTEGER, name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);", true);
+	p.parse("INSERT INTO cars VALUES FROM (7,\"bob\", \"the builder\", 46,67);", true);
+	p.parse("CREATE TABLE Shipments (Car_ID INTEGER, Name VARCHAR(1), model VARCHAR(1), year INTEGER, engine_type INTEGER) PRIMARY KEY (carid);", true);
+	p.parse("INSERT INTO cars VALUES FROM (001,\"Audi\", \"R8\", 2013,34);", true);
+	p.parse("INSERT INTO cars VALUES FROM (002,\"Chevrolet\", \"Cobalt\", 2013,36);", true);
+	p.parse("INSERT INTO cars VALUES FROM (002,\"Chevrolet\", \"Malibu\", 2014,56);", true);
+	p.parse("INSERT INTO cars VALUES FROM (003,\"Nissan\", \"Altima\", 2011,38);", true);
+	p.parse("INSERT INTO cars VALUES FROM (004,\"Audi\", \"A8\", 2014,43);", true);
+	p.parse("INSERT INTO Shipments VALUES FROM (004,\"Audi\", \"A8\", 2015,43);", true);
+	p.parse("INSERT INTO Shipments VALUES FROM (004,\"Audi\", \"A8\", 2015,43);", true);
 }
 
 void DBApp:: Create_Customer_table() {
-	p.parse("CREATE TABLE Customers (Customer_ID INTEGER, FirstName VARCHAR(1), LastName VARCHAR(1), Car_bought VARCHAR(20)) PRIMARY KEY (Customer_ID);");
-	p.parse("INSERT INTO Customers VALUES FROM (111,\"Saurabh\", \"Mishra\", \"Nissan\");");
-	p.parse("INSERT INTO Customers VALUES FROM (112,\"Bradley\", \"Abbot\", \"Audi\");");
-	p.parse("INSERT INTO Customers VALUES FROM (113,\"Michael\", \"Karnes\", \"Mercedes\");");
+	p.parse("CREATE TABLE Customers (Customer_ID INTEGER, FirstName VARCHAR(1), LastName VARCHAR(1), Car_bought VARCHAR(20)) PRIMARY KEY (Customer_ID);", true);
+	p.parse("INSERT INTO Customers VALUES FROM (111,\"Saurabh\", \"Mishra\", \"Nissan\");", true);
+	p.parse("INSERT INTO Customers VALUES FROM (112,\"Bradley\", \"Abbot\", \"Audi\");", true);
+	p.parse("INSERT INTO Customers VALUES FROM (113,\"Michael\", \"Karnes\", \"Mercedes\");", true);
+}
+
+void DBApp:: AddShipment() {
+	p.parse("cars <- cars + Shipments;",true);
+	p.parse("SHOW cars;",true);
 }
 
 void DBApp:: SearchCarsByName() {
 	string car_name;
-	cout << "Enter the name of tha car you want to search " << endl;
+	cout << "Enter the name of the car you want to search " << endl;
 	cin >> car_name;
-	p.parse("Search_result <- select (Name == \""+car_name+"\""+") cars;");
-	p.parse("SHOW Search_result;");
-	cout << "Search_result <- select (Name == \""+car_name+"\""+");"<< endl;
+	p.parse("Search_result <- select (Name == \""+car_name+"\""+") cars;", true);
+	p.parse("SHOW Search_result;", true);
 }
 
 void DBApp:: ShowCustomerNames() {
-	p.parse("Customer_names <- project(FirstName,LastName) Customers;");
-	p.parse("SHOW Customer_names;");
+	p.parse("Customer_names <- project(FirstName,LastName) Customers;", true);
+	p.parse("SHOW Customer_names;", true);
 }
 
 void DBApp:: AddCar(string table_name) {
@@ -49,13 +53,13 @@ void DBApp:: AddCar(string table_name) {
 	cout << "Enter the engine type of the car " << endl;
 	cin >> engine;
 	
-	p.parse("INSERT INTO "+table_name+" VALUES FROM ("+carID+", "+ "\"" + name +"\"" + ", " + "\"" + model +"\"" +", " + year +", "+engine+");");
+	p.parse("INSERT INTO "+table_name+" VALUES FROM ("+carID+", "+ "\"" + name +"\"" + ", " + "\"" + model +"\"" +", " + year +", "+engine+");", true);
 	cout << "Values have been added :) " << endl;
 }
 
 void DBApp:: Diff() {
-	p.parse("NotInWarehouse <- Shipments - cars;");
-	p.parse("SHOW NotInWarehouse;");
+	p.parse("NotInWarehouse <- Shipments - cars;", true);
+	p.parse("SHOW NotInWarehouse;", true);
 }
 
 void DBApp:: ShowCarsByManufacturers(string table_name) { 
@@ -72,23 +76,23 @@ void DBApp:: ShowCarsByManufacturers(string table_name) {
 	}
 	
 	if(x == 2) {
-		p.parse("Chevrolet <- select (Name == \"Chevrolet\") "+table_name+";");
-		p.parse("SHOW Chevrolet;");
+		p.parse("Chevrolet <- select (Name == \"Chevrolet\") "+table_name+";", true);
+		p.parse("SHOW Chevrolet;", true);
 	}
 	
 	if(x == 3) {
-		p.parse("Mercedes <- select (Name == \"Mercedes\") "+table_name+";");
-		p.parse("SHOW Mercedes;");
+		p.parse("Mercedes <- select (Name == \"Mercedes\") "+table_name+";", true);
+		p.parse("SHOW Mercedes;", true);
 	}
 	
 	if(x == 4) {
-		p.parse("Audi <- select (Name == \"Audi\") "+table_name+";");
-		p.parse("SHOW Audi;");
+		p.parse("Audi <- select (Name == \"Audi\") "+table_name+";", true);
+		p.parse("SHOW Audi;", true);
 	}
 	
 	if(x == 5) {
-		p.parse("Nissan <- select (Name == \"Nissan\") "+table_name+";");
-		p.parse("SHOW Nissan;");
+		p.parse("Nissan <- select (Name == \"Nissan\") "+table_name+";", true);
+		p.parse("SHOW Nissan;", true);
 	}
 	
 	else {
@@ -99,7 +103,6 @@ void DBApp:: ShowCarsByManufacturers(string table_name) {
 }
 
 void DBApp:: UpdateCar(string table_name) {
-	//cout << "\nUPDATE "+table_name+" SET WHERE (name == "+car_name+");" << endl;
 	int n;
 	cout << "Choose the information about the  car that you would like to update " << endl;
 	cout << "1. Name of the car " << endl;
@@ -115,43 +118,49 @@ void DBApp:: UpdateCar(string table_name) {
 		cin >> old_name;
 		cout << "Enter new name of the car " << endl;
 		cin >> new_name;
-		p.parse("UPDATE "+table_name+" SET name = "+new_name+" WHERE name < "+old_name+";");
+		p.parse("UPDATE "+table_name+" SET Name = \""+new_name+"\" WHERE Name == \""+old_name+"\";", true);
 	}	
 	return;
 }
 void DBApp:: ShowTable(string tablename) {
-	p.parse("SHOW " + tablename + ";");
-	//parser.parse("SHOW " + tablename+";");
+	p.parse("SHOW " + tablename + ";", true);
 	return;
 }
 
 void DBApp:: ShowCustomers() {
-	p.parse("SHOW Customers;");
+	p.parse("SHOW Customers;", true);
 }
 
 void DBApp:: DeleteCar(string car_name, string table_name) {
-	//cout << "\nDELETE FROM "+table_name+" WHERE (name == "+car_name+");" << endl;
-	p.parse("DELETE FROM "+table_name+" WHERE (name == "+car_name+");");
+	p.parse("DELETE FROM "+table_name+" WHERE (Name == \""+car_name+"\");", true);
 	return;
 }
 
 void DBApp:: ShowCarWithID(string table_name) {
-	p.parse("Cars_ID <- project (carid,name) cars;");
-	p.parse("SHOW Cars_ID;");
+	p.parse("Cars_ID <- project (carid,name) cars;", true);
+	p.parse("SHOW Cars_ID;", true);
 	return;
 }
 
 void DBApp:: Exit() {
-	p.parse("EXIT;");
+	p.parse("EXIT;", true);
 }
 
 void DBApp:: test() {
 	//p.parse("UPDATE cars SET Name = 0 WHERE Name == Chevrolet;");
-	p.parse("Search_result <- select (Name == \"Audi\") cars;");
+	p.parse("Search_result <- select (Name == \"Audi\") cars;", true);
 	//p.parse("DELETE FROM cars WHERE (Name == Audi);");
-	p.parse("SHOW cars;");
+	p.parse("SHOW cars;", true);
 }
-	
+
+void DBApp:: Write(string table_name) {
+	p.parse("WRITE "+table_name+";",true);	
+}
+
+void DBApp:: Open(string table_name) {
+	p.parse("OPEN "+table_name+";",true);
+}
+
 int main() {
 int x;
 
@@ -159,6 +168,7 @@ int x;
  DBApp d;
  d.CreateTable();
  d.Create_Customer_table();
+ string line;
  //d.test();
 // d.CreateTable();
  while(true) {
@@ -175,8 +185,11 @@ int x;
 		cout << "8. Search cars by name " << endl;
 		cout << "9. Show cars by manufacturers " << endl;
 		cout << "10. Show the names of all customers " << endl;
-		cout << "11. Exit " << endl;
-	
+		cout << "11. Add the shipment to the cars in the warehouse " << endl;
+		cout << "12. Write back to the file " << endl;
+		cout << "13. Open an existing table " << endl;
+		cout << "13. Exit " << endl;
+		
 		cin >> x;
 		
 		if(x == 1) {
@@ -243,11 +256,29 @@ int x;
 		}
 		
 		if(x == 11) {
+			d.AddShipment();
+		}
+		
+		if(x == 12) { 
+			string table_name;
+			cout << "Enter the name of the table to be written back to the file " << endl;
+			cin >> table_name;
+			d.Write(table_name);
+		}
+		
+		if(x == 13) {
+			string table_name;
+			cout << "Enter the name of the table to be opened from the file " << endl;
+			cin >> table_name;
+			d.Open(table_name);
+		}
+		
+		if(x == 14) {
 			cout << " \n         Good Bye :) " << endl;
 			d.Exit();
 		}	
 		
-		if(x == 12) {
+		if(x == 15) {
 			d.test();
 		}
 		
