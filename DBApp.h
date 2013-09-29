@@ -26,6 +26,9 @@ class DBApp {
 		void SearchCarsByName();
 		void ShowCarsByManufacturers(string table_name);
 		void ShowCustomerNames();
+		void AddShipment();
+		void Write(string table_name);
+		void Open(string table_name);
 };
 
 #endif
